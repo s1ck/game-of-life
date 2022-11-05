@@ -1,0 +1,8 @@
+[package]
+name = "game-of-life"
+authors = ["Martin Junghanns <github@s1ck.dev>"]
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+crossterm = "0.25.0"
