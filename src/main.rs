@@ -16,7 +16,7 @@ use game::Grid;
 mod game;
 
 fn main() -> Result<()> {
-    let mut grid = Grid::new(20, 20);
+    let mut grid = Grid::<20, 20>::new();
 
     grid.set_alive(0, 1);
     grid.set_alive(1, 2);

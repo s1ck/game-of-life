@@ -6,26 +6,16 @@ enum CellState {
     Alive,
 }
 
-pub struct Grid {
-    rows: usize,
-    cols: usize,
+pub struct Grid<const HEIGHT: usize, const WIDTH: usize> {
     cells: Vec<CellState>,
     cache: Vec<CellState>,
 }
 
-type Width = usize;
-type Height = usize;
-
-impl Grid {
-    pub fn new(height: Height, width: Width) -> Self {
-        let cells = vec![CellState::Dead; height * width];
+impl<const HEIGHT: usize, const WIDTH: usize> Grid<HEIGHT, WIDTH> {
+    pub fn new() -> Self {
+        let cells = vec![CellState::Dead; HEIGHT * WIDTH];
         let cache = cells.clone();
-        Self {
-            rows: height,
-            cols: width,
-            cells,
-            cache,
-        }
+        Self { cells, cache }
     }
 
     pub fn set_alive(&mut self, row: usize, col: usize) {
@@ -34,8 +24,8 @@ impl Grid {
     }
 
     pub fn iterate(&mut self) {
-        for row in 0..self.rows {
-            for col in 0..self.cols {
+        for row in 0..HEIGHT {
+            for col in 0..WIDTH {
                 let cell_idx = self.cell_index(row, col);
                 let nghb_cnt = self.count_neighbors(row, col);
 
@@ -55,20 +45,20 @@ impl Grid {
     }
 
     fn cell_index(&self, row: usize, col: usize) -> usize {
-        row * self.cols + col
+        row * WIDTH + col
     }
 
     fn count_neighbors(&self, row: usize, col: usize) -> usize {
         let mut count = 0;
 
-        for delta_row in [self.cols - 1, 0, 1] {
-            for delta_col in [self.rows - 1, 0, 1] {
+        for delta_row in [WIDTH - 1, 0, 1] {
+            for delta_col in [HEIGHT - 1, 0, 1] {
                 if delta_col == 0 && delta_row == 0 {
                     continue;
                 }
 
-                let neighbor_row = (row + delta_row) % self.rows;
-                let neighbor_col = (col + delta_col) % self.cols;
+                let neighbor_row = (row + delta_row) % HEIGHT;
+                let neighbor_col = (col + delta_col) % WIDTH;
 
                 let neighbor_idx = self.cell_index(neighbor_row, neighbor_col);
 
@@ -80,9 +70,9 @@ impl Grid {
     }
 }
 
-impl Display for Grid {
+impl<const HEIGHT: usize, const WIDTH: usize> Display for Grid<HEIGHT, WIDTH> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        for row in self.cells.chunks(self.cols) {
+        for row in self.cells.chunks(WIDTH) {
             for cell in row {
                 let symbol = match cell {
                     CellState::Dead => ' ',
@@ -103,7 +93,7 @@ mod tests {
 
     #[test]
     fn test_cell_index() {
-        let grid = Grid::new(6, 6);
+        let grid = Grid::<6, 6>::new();
 
         assert_eq!(grid.cell_index(0, 4), 4);
         assert_eq!(grid.cell_index(2, 2), 14);
@@ -112,7 +102,7 @@ mod tests {
 
     #[test]
     fn test_count_neighbors() {
-        let mut grid = Grid::new(5, 5);
+        let mut grid = Grid::<5, 5>::new();
         grid.set_alive(1, 2);
         grid.set_alive(2, 3);
         grid.set_alive(3, 0);
@@ -127,7 +117,7 @@ mod tests {
 
     #[test]
     fn test_iterate() {
-        let mut grid = Grid::new(5, 5);
+        let mut grid = Grid::<5, 5>::new();
         grid.set_alive(1, 2);
         grid.set_alive(2, 3);
         grid.set_alive(3, 1);
@@ -136,7 +126,7 @@ mod tests {
 
         grid.iterate();
 
-        let mut expected = Grid::new(5, 5);
+        let mut expected = Grid::<5, 5>::new();
         expected.set_alive(2, 1);
         expected.set_alive(2, 3);
         expected.set_alive(3, 2);
